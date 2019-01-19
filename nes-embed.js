@@ -28,6 +28,7 @@ var nes = new NES({
 		audio_samples_R[audio_write_cursor] = r;
 		audio_write_cursor = (audio_write_cursor + 1) & SAMPLE_MASK;
 	},
+	sampleRate: audio_ctx.sampleRate,
 });
 
 function onAnimationFrame(){
