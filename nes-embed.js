@@ -104,7 +104,7 @@ function nes_init(canvas_id){
 function nes_boot(rom_data){
 	nes.loadROM(rom_data);
 	clearInterval(timer);
-	timer=setInterval("onAnimationFrame()",nes.frameTime);
+	timer=setInterval("onAnimationFrame()",1000/60);
 }
 
 function nes_load_data(canvas_id, rom_data){
