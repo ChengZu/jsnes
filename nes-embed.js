@@ -32,9 +32,6 @@ var nes = new NES({
 });
 
 function onAnimationFrame(){
-	//the animation default run on 60 fps
-	timer=window.requestAnimationFrame(onAnimationFrame);
-	
 	image.data.set(framebuffer_u8);
 	canvas_ctx.putImageData(image, 0, 0);
 	nes.frame();
@@ -106,8 +103,8 @@ function nes_init(canvas_id){
 
 function nes_boot(rom_data){
 	nes.loadROM(rom_data);
-	window.cancelAnimationFrame(timer);
-	timer=window.requestAnimationFrame(onAnimationFrame);
+	clearInterval(timer);
+	timer=setInterval("onAnimationFrame()",nes.frameTime);
 }
 
 function nes_load_data(canvas_id, rom_data){
