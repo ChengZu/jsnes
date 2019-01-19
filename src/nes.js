@@ -7,7 +7,6 @@ var NES = function(opts) {
     onBatteryRamWrite: function() {},
 
     // FIXME: not actually used except for in PAPU
-	// frame() must run on 60fps the game can run normal
     preferredFrameRate: 60,
 
     emulateSound: true,
