@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Embedding Example</title>
+		
+		<script type="text/javascript" src="src/controller.js"></script>
+		<script type="text/javascript" src="src/cpu.js"></script>
+		<script type="text/javascript" src="src/mappers.js"></script>
+		<script type="text/javascript" src="src/nes.js"></script>
+		<script type="text/javascript" src="src/papu.js"></script>
+		<script type="text/javascript" src="src/ppu.js"></script>
+		<script type="text/javascript" src="src/rom.js"></script>
+		<script type="text/javascript" src="src/tile.js"></script>
+		<script type="text/javascript" src="src/utils.js"></script>
+		<script type="text/javascript" src="nes-embed.js"></script>
+		<script> 
+		function loadRom(){
+			var file = document.getElementById("file").files[0];
+			if(file==undefined){
+				alert("Select A Local Rom");
+				return;
+			}
+			var reader = new FileReader();
+			reader.readAsBinaryString(file);
+			reader.onload=function(f){
+				document.getElementById("rom").innerHTML='<button onclick="loadNewRom();">loadNewRom</button><button onclick="nes.reloadROM();">reset</button>';
+				nes_load_data("nes-canvas", this.result);
+			}
+		}
+		function loadNewRom(){
+			document.getElementById("rom").innerHTML='<input type="file" id="file" onchange="loadRom();" /><button onclick="loadRom();">loadRom</button>';
+			document.getElementById("file").click();
+		}
+		window.onload = function(){
+			nes_init("nes-canvas");
+			//input dom event in conflict with nes event
+			document.getElementById("rom").innerHTML='<input type="file" id="file" onchange="loadRom();" /><button onclick="loadRom();">loadRom</button>';
+		}
+		</script>
+	</head>
+	<body>
+		<div style="margin: auto; width: 75%;">
+		<div id="rom"></div>
+			<canvas id="nes-canvas" width="256" height="240" style="width: 100%"/>
+		</div>
+		<p>DPad: Arrow keys<br/>Start: Return, Select: Tab<br/>A Button: A, B Button: S</p>
+	</body>
+</html>
