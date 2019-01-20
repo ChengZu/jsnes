@@ -67,7 +67,7 @@ NES.prototype = {
   frame: function() {
     this.ppu.startFrame();
     var ppuCycles = 0;
-    var papuclockFrameCounter =0;
+    var papuclockFrameCounter = 0;
     var emulateSound = this.opts.emulateSound;
     var cpu = this.cpu;
     var ppu = this.ppu;
