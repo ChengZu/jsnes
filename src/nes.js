@@ -73,14 +73,13 @@ NES.prototype = {
     var ppu = this.ppu;
     var papu = this.papu;
     FRAMELOOP: for (;;) {
-      //if (cpu.cyclesToHalt === 0) {
+      if (cpu.cyclesToHalt === 0) {
         // Execute a CPU instruction
         cycles = cpu.emulate();
         ppuCycles = cycles * 3;
         papuclockFrameCounter = cycles;
-		/*
+
       } else {
-        // make ppu run less code in loop, then we can true one frame has render in time
         if (cpu.cyclesToHalt > 8) {
           ppuCycles = 8 * 3;
           papuclockFrameCounter = 8;
@@ -90,11 +89,37 @@ NES.prototype = {
           papuclockFrameCounter = cpu.cyclesToHalt;
           cpu.cyclesToHalt = 0;
         }
-      }*/
+      }
 	  
       if (emulateSound) papu.clockFrameCounter(papuclockFrameCounter);
 	  
-      if (ppu.emulateCycles(ppuCycles)) break FRAMELOOP;
+      //if (ppu.emulateCycles(ppuCycles)) break FRAMELOOP;
+      for (; ppuCycles > 0; ppuCycles--) {
+        if (
+          ppu.curX === ppu.spr0HitX &&
+          ppu.f_spVisibility === 1 &&
+          ppu.scanline - 21 === ppu.spr0HitY
+        ) {
+          // Set sprite 0 hit flag:
+          ppu.setStatusFlag(ppu.STATUS_SPRITE0HIT, true);
+        }
+
+        if (ppu.requestEndFrame) {
+          ppu.nmiCounter--;
+          if (ppu.nmiCounter === 0) {
+            ppu.requestEndFrame = false;
+            ppu.startVBlank();
+            break FRAMELOOP;
+          }
+        }
+
+        ppu.curX++;
+        if (ppu.curX === 341) {
+          ppu.curX = 0;
+          ppu.endScanline();
+        }
+      }
+    
 	  
     }
     this.fpsFrameCount++;
