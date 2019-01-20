@@ -73,14 +73,14 @@ NES.prototype = {
     var ppu = this.ppu;
     var papu = this.papu;
     FRAMELOOP: for (;;) {
-      if (cpu.cyclesToHalt === 0) {
+      //if (cpu.cyclesToHalt === 0) {
         // Execute a CPU instruction
         cycles = cpu.emulate();
         ppuCycles = cycles * 3;
         papuclockFrameCounter = cycles;
-		
+		/*
       } else {
-        // make ppu run less code in loop, then we can true one frame has render
+        // make ppu run less code in loop, then we can true one frame has render in time
         if (cpu.cyclesToHalt > 8) {
           ppuCycles = 8 * 3;
           papuclockFrameCounter = 8;
@@ -90,7 +90,7 @@ NES.prototype = {
           papuclockFrameCounter = cpu.cyclesToHalt;
           cpu.cyclesToHalt = 0;
         }
-      }
+      }*/
 	  
       if (emulateSound) papu.clockFrameCounter(papuclockFrameCounter);
 	  
