@@ -298,7 +298,36 @@ PPU.prototype = {
       this.vramMirrorTable[fromStart + i] = toStart + i;
     }
   },
+  emulateCycles: function(cycles) {
+    //cycles = (!this.requestEndFrame && this.curX+cycles<341 && (this.scanline-20 < this.spr0HitY || this.scanline-22 > this.spr0HitY))?cycles:1;
+    var endOneFrame = false;
+    for (; cycles > 0; cycles--) {
+      if (
+        this.curX === this.spr0HitX &&
+        this.f_spVisibility === 1 &&
+        this.scanline - 21 === this.spr0HitY
+      ) {
+        // Set sprite 0 hit flag:
+        this.setStatusFlag(this.STATUS_SPRITE0HIT, true);
+      }
 
+      if (this.requestEndFrame) {
+        this.nmiCounter--;
+        if (this.nmiCounter === 0) {
+          this.requestEndFrame = false;
+          this.startVBlank();
+          endOneFrame = true;
+        }
+      }
+
+      this.curX++;
+      if (this.curX === 341) {
+        this.curX = 0;
+        this.endScanline();
+      }
+      return endOneFrame;
+    }
+  },
   startVBlank: function() {
     // Do NMI:
     this.nes.cpu.requestIrq(this.nes.cpu.IRQ_NMI);
