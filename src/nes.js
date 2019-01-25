@@ -88,34 +88,10 @@ NES.prototype = {
 	  
       if (emulateSound) papu.clockFrameCounter(cycles);
 	  
-      //if (ppu.emulateCycles(cycles * 3)) break FRAMELOOP;
-      //*
-      for (var i = cycles * 3; i > 0; i--) {
-        if (
-          ppu.curX === ppu.spr0HitX &&
-          ppu.f_spVisibility === 1 &&
-          ppu.scanline - 21 === ppu.spr0HitY
-        ) {
-          // Set sprite 0 hit flag:
-          ppu.setStatusFlag(ppu.STATUS_SPRITE0HIT, true);
-        }
 
-        if (ppu.requestEndFrame) {
-          ppu.nmiCounter--;
-          if (ppu.nmiCounter === 0) {
-            ppu.requestEndFrame = false;
-            ppu.startVBlank();
-            break FRAMELOOP;
-          }
-        }
+	  
+      if (ppu.emulateCycles(cycles * 3)) break FRAMELOOP;
 
-        ppu.curX++;
-        if (ppu.curX === 341) {
-          ppu.curX = 0;
-          ppu.endScanline();
-        }
-      }
-    //*/
     }
     this.fpsFrameCount++;
   },
