@@ -143,7 +143,9 @@ CPU.prototype = {
       this.irqRequested = false;
     }
 
-    var opinf = this.opdata[this.nes.mmap.load(this.REG_PC + 1)];
+    var opcode = this.nes.mmap.load(this.REG_PC + 1);
+    var opinf = this.opdata[opcode];
+
     var cycleCount = opinf >> 24;
     var cycleAdd = 0;
 
@@ -1242,15 +1244,24 @@ CPU.prototype = {
         if (addrMode !== 11) cycleCount += cycleAdd; // PostIdxInd = 11
         break;
       }
+      case 70: {
+        // *******
+        // * JAM *
+        // *******
+
+
+        
+        break;
+      }
 
       default: {
         // *******
         // * ??? *
         // *******
+        
+        console.log("Game crashed, invalid opcode $"+ opcode.toString(16) +" at address $" + opaddr.toString(16));
+        //this.nes.stop();
 
-        this.nes.stop();
-        this.nes.crashMessage =
-          "Game crashed, invalid opcode at address $" + opaddr.toString(16);
         break;
       }
     } // end of switch
@@ -1414,10 +1425,33 @@ CPU.prototype = {
 
 // Generates and provides an array of details about instructions
 var OpData = function() {
+  // prettier-ignore
+  this.cycTable = new Array(
+    /*0x00*/ 7,6,2,8,3,3,5,5,3,2,2,2,4,4,6,6,
+    /*0x10*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
+    /*0x20*/ 6,6,2,8,3,3,5,5,4,2,2,2,4,4,6,6,
+    /*0x30*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
+    /*0x40*/ 6,6,2,8,3,3,5,5,3,2,2,2,3,4,6,6,
+    /*0x50*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
+    /*0x60*/ 6,6,2,8,3,3,5,5,4,2,2,2,5,4,6,6,
+    /*0x70*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
+    /*0x80*/ 2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,
+    /*0x90*/ 2,6,2,6,4,4,4,4,2,5,2,5,5,5,5,5,
+    /*0xA0*/ 2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,
+    /*0xB0*/ 2,5,2,5,4,4,4,4,2,4,2,4,4,4,4,4,
+    /*0xC0*/ 2,6,2,8,3,3,5,5,2,2,2,2,4,4,6,6,
+    /*0xD0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
+    /*0xE0*/ 2,6,3,8,3,3,5,5,2,2,2,2,4,4,6,6,
+    /*0xF0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7
+  );
   this.opdata = new Array(256);
 
   // Set all to invalid instruction (to detect crashes):
-  for (var i = 0; i < 256; i++) this.opdata[i] = 0xff;
+
+  for (var i = 0; i < 256; i++) {
+    //this.opdata[i] = 0xff;
+    this.setOp(0xff, i, this.ADDR_IMP, 1, this.cycTable[i]);
+  }
 
   // Now fill in all valid opcodes:
 
@@ -1795,26 +1829,24 @@ var OpData = function() {
   this.setOp(this.INS_IGN, 0x74, this.ADDR_ZPX, 2, 4);
   this.setOp(this.INS_IGN, 0xd4, this.ADDR_ZPX, 2, 4);
   this.setOp(this.INS_IGN, 0xf4, this.ADDR_ZPX, 2, 4);
+  
+  // rarely executed
+  //JAM
+  this.setOp(this.INS_JAM, 0x02, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x12, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x22, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x32, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x42, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x52, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x62, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x72, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0x92, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0xB2, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0xD2, this.ADDR_IMP, 1, 2);
+  this.setOp(this.INS_JAM, 0xF2, this.ADDR_IMP, 1, 2);
 
-  // prettier-ignore
-  this.cycTable = new Array(
-    /*0x00*/ 7,6,2,8,3,3,5,5,3,2,2,2,4,4,6,6,
-    /*0x10*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
-    /*0x20*/ 6,6,2,8,3,3,5,5,4,2,2,2,4,4,6,6,
-    /*0x30*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
-    /*0x40*/ 6,6,2,8,3,3,5,5,3,2,2,2,3,4,6,6,
-    /*0x50*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
-    /*0x60*/ 6,6,2,8,3,3,5,5,4,2,2,2,5,4,6,6,
-    /*0x70*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
-    /*0x80*/ 2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,
-    /*0x90*/ 2,6,2,6,4,4,4,4,2,5,2,5,5,5,5,5,
-    /*0xA0*/ 2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,
-    /*0xB0*/ 2,5,2,5,4,4,4,4,2,4,2,4,4,4,4,4,
-    /*0xC0*/ 2,6,2,8,3,3,5,5,2,2,2,2,4,4,6,6,
-    /*0xD0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
-    /*0xE0*/ 2,6,3,8,3,3,5,5,2,2,2,2,4,4,6,6,
-    /*0xF0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7
-  );
+
+
 
   this.instname = new Array(70);
 
@@ -1992,8 +2024,11 @@ OpData.prototype = {
   INS_SRE: 67,
   INS_SKB: 68,
   INS_IGN: 69,
+  INS_JAM: 70,
 
-  INS_DUMMY: 70, // dummy instruction used for 'halting' the processor some cycles
+  INS_DUMMY: 71, // dummy instruction used for 'halting' the processor some cycles
+  
+
 
   // -------------------------------- //
 
@@ -2012,10 +2047,10 @@ OpData.prototype = {
   ADDR_POSTIDXIND: 11,
   ADDR_INDABS: 12,
 
-  setOp: function(inst, op, addr, size, cycles) {
-    this.opdata[op] =
-      (inst & 0xff) |
-      ((addr & 0xff) << 8) |
+  setOp: function(instname, opcode, addrMode, size, cycles) {
+    this.opdata[opcode] =
+      (instname & 0xff) |
+      ((addrMode & 0xff) << 8) |
       ((size & 0xff) << 16) |
       ((cycles & 0xff) << 24);
   }
